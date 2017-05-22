@@ -29,11 +29,11 @@ def train(hps, mode, arch):
                                                                           tf.summary.scalar('Accuracy', accuracy)]))
 
     logging_hook = tf.train.LoggingTensorHook(tensors={
-                                                  'step': model.global_step, 
-                                                  'loss': model.cost, 
-                                                  'accuracy': accuracy}, 
-                                              every_n_iter=100
-                                              )
+        'step': model.global_step,
+        'loss': model.cost,
+        'accuracy': accuracy},
+        every_n_iter=100
+    )
 
     class _LearningRateSetterHook(tf.train.SessionRunHook):
         """ Decay the learning rate after certain amount of training steps """
@@ -42,14 +42,14 @@ def train(hps, mode, arch):
             self._learning_rate = 0.1
 
         def before_run(self, run_context):
-            # Because we will change the learning rate, we need to 
+            # Because we will change the learning rate, we need to
             # feed it to the model while running the session
-            return tf.train.SessionRunArgs(model.global_step, 
+            return tf.train.SessionRunArgs(model.global_step,
                                            feed_dict={model.learning_rate: self._learning_rate}
                                            )
 
         def after_run(self, run_context, run_values):
-            train_step = run_values.results # trian_step == global_step
+            train_step = run_values.results  # trian_step == global_step
 
             if train_step < 20000:
                 self._learning_rate = 0.1
@@ -92,13 +92,13 @@ def evaluate(hps, mode, eval_once, arch):
         except tf.errors.OutOfRangeError as e:
             tf.logging.erorr('Cat\'t restore checkpoint: %s', e)
             continue
-        
+
         if not (ckpt_state and ckpt_state.model_checkpoint_path):
             tf.logging.info('No model to eval at %s', checkpoint_dir)
             continue
-        
+
         tf.logging.info('Loading checkpoint %s', ckpt_state.model_checkpoint_path)
-        
+
         saver.restore(sess, ckpt_state.model_checkpoint_path)
 
         total_prediction, correct_predicion = 0.0, 0.0
@@ -147,7 +147,7 @@ def _plot(conv, n=0):
 
         ax.set_xticks([])
         ax.set_yticks([])
-    
+
     plt.show()
 
 
@@ -160,7 +160,7 @@ def _get_conv_feature_maps(hps, arch):
     sess = tf.Session()
 
     tf.train.start_queue_runners(sess)
-    
+
     ckpt_state = tf.train.get_checkpoint_state(checkpoint_dir)
     saver = tf.train.Saver()
     saver.restore(sess, ckpt_state.model_checkpoint_path)
@@ -173,10 +173,10 @@ def _get_conv_feature_maps(hps, arch):
 
 def plot_feature_maps(hps, arch):
     conv_maps, images = _get_conv_feature_maps(hps, arch)
-    
+
     for i in range(len(conv_maps)):
         _plot(conv_maps[i], 0)
-    
+
 
 def _get_kwargs():
     parser = argparse.ArgumentParser()
@@ -220,4 +220,3 @@ def run(**kwargs):
         plot_feature_maps(hps, arch)
 
 run()
-

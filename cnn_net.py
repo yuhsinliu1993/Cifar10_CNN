@@ -32,7 +32,7 @@ class CNN_NET(object):
     def build_graph(self):
         # Returns and create (if necessary) the global step variable
         self.global_step = tf.contrib.framework.get_or_create_global_step()
-        
+
         if self.arch == 1:
             self._build_model_1()
         elif self.arch == 2:
@@ -89,7 +89,6 @@ class CNN_NET(object):
 
         self.cost = self._loss()
 
-
     def _build_model_2(self):
         """ Build the core model within the graph """
 
@@ -122,7 +121,6 @@ class CNN_NET(object):
         self.predictions = tf.nn.softmax(logits=self.fc2)
 
         self.cost = self._loss()
-    
 
     def _build_model_3(self):
         """ Build the core model within the graph """
@@ -151,7 +149,6 @@ class CNN_NET(object):
 
         self.cost = self._loss()
 
-
     def _loss(self):
         with tf.variable_scope('costs'):
             cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=self.fc2,
@@ -162,7 +159,6 @@ class CNN_NET(object):
             tf.summary.scalar('cost', cost)
 
             return cost
-
 
     def _build_train_op(self):
         """ Build training specific ops for the graph """
@@ -186,7 +182,6 @@ class CNN_NET(object):
         train_ops = [apply_grad_op] + self._extra_train_ops
         self.train_op = tf.group(*train_ops)
 
-
     def _conv_layer(self, name, x, filter_size, in_filters, out_filters, strides):
         with tf.variable_scope(name) as scope:
             n = filter_size * filter_size * out_filters
@@ -208,21 +203,17 @@ class CNN_NET(object):
             conv = tf.nn.relu(pre_activation, name=scope.name)
 
             self.conv_list.append(conv)
-            
-            return conv
 
+            return conv
 
     def _local_response_norm(self, name, x):
         return tf.nn.lrn(x, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name=name)
 
-
     def _max_pool(self, name, bottom):
         return
 
-
     def _avg_pool(self, name, bottom):
         return tf.nn.avg_pool(bottom, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name=name)
-
 
     def _fully_connected_layer(self, name, x, out_dim):
         with tf.variable_scope(name) as scope:
@@ -238,10 +229,8 @@ class CNN_NET(object):
 
             return tf.nn.xw_plus_b(x, w, b)
 
-
     def _relu(self, x, leakiness=0.0):
         return tf.where(tf.less(x, 0.0), leakiness * x, x, name='leak_relu')
-
 
     def _l2_decay(self):
         costs = []
@@ -250,7 +239,6 @@ class CNN_NET(object):
                 costs.append(tf.nn.l2_loss(var))
 
         return tf.multiply(self.hps.weight_decay_rate, tf.add_n(costs))
-
 
     def _batch_norm(self, name, x):
         """ TEST """
@@ -288,4 +276,3 @@ class CNN_NET(object):
             y.set_shape(x.get_shape())
 
             return y
-
